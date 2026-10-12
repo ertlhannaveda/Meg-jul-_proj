@@ -28,7 +28,7 @@ Optimalizálás: a legkedvezőbb elpárolgási nyomás (pevap) és munkaközeg k
 Python felelősség: Az éves futtató és optimalizáló motor (annual_simulation.py / optimizer.py), éves termelési görbék és hisztogramok rajzolása.
 
 
-Csapattag 4: Gazdasági, Környezeti & Társadalmi Értékelés
+Lelkes Barnabbás: Gazdasági, Környezeti & Társadalmi Értékelés
 Fő feladat: A műszaki eredmények lefordítása pénzügyi mutatókra és fenntarthatósági mérőszámokra.
 Részfeladatok:
 Beruházási (CAPEX: fúrás, ORC gépészet, kiserőművi infrastruktúra) és üzemeltetési (OPEX: karbantartás, biztosítás) költségbecslés.
