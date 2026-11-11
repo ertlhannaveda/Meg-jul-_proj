@@ -23,9 +23,8 @@ Hanna: Dinamikus Éves Szimuláció & Rendszer-optimalizálás
 Fő feladat: A termodinamikai modell és az órás idősor összekapcsolása 8760 órára, valamint a működési paraméterek optimalizálása.
 Részfeladatok:
 A rendszer viselkedésének modellezése változó környezeti hőmérséklet mellett (nyári teljesítménycsökkenés vs. téli csúcstermelés).
-Segédüzemi fogyasztások lefedése (kondenzátor ventilátorok, kút-szivattyúk).
 Optimalizálás: a legkedvezőbb elpárolgási nyomás (pevap) és munkaközeg kiválasztása az éves villamosenergia-hozam maximalizálására.
-Python felelősség: Az éves futtató és optimalizáló motor (annual_simulation.py / optimizer.py), éves termelési görbék és hisztogramok rajzolása.
+Python felelősség: Az éves futtató és optimalizáló motor (annual_simulation.ipynb), éves termelési görbék rajzolása.
 
 
 Lelkes Barnabbás: Gazdasági, Környezeti & Társadalmi Értékelés
