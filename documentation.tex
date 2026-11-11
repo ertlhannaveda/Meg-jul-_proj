@@ -168,11 +168,11 @@ Geotermikus erőmű villamosenergia-termelésre\par}
     \vspace{0.1cm}
 
     {\bfseries
-    név (neptun kód)\par}
+    Milán MÉSZÁROS BGKM9O\par}
      {\normalsize
-    szak\par}
+    Fizikus-mérnök BSc\par}
     {\normalsize
-    email}
+    mmilan20050601@gmail.com}
     
 \end{minipage}
 \hfill
@@ -207,6 +207,157 @@ Geotermikus erőmű villamosenergia-termelésre\par}
 
 \newpage \section{ORC Termodinamikai Modell}
 
+A geotermikus hőforrás villamosenergia-termelési célú hasznosítását
+szerves Rankine-körfolyamattal (ORC) vizsgáltuk.
+A termálvíz hőcserélőn keresztül melegíti és elpárologtatja a szerves
+munkaközeget, amely a turbinában expandálva mechanikai munkát szolgáltat.
+A kondenzációt követően a szivattyú ismét az elpárolgási nyomásra emeli
+a munkaközeg nyomását.
+
+A Pythonban megvalósított modell egy termelő kúthoz tartozó,
+állandósult üzemi pontot határoz meg. A vizsgált munkaközegek az
+R245fa, az R1233zd(E) és az R600a; termodinamikai tulajdonságaikat
+a CoolProp könyvtárral számítottuk. A mozgási és helyzeti energia
+változását, valamint a csővezetékek és hőcserélők nyomásveszteségét
+elhanyagoltuk. A turbina és a szivattyú veszteségeit izentrópikus
+hatásfokkal vettük figyelembe.
+
+\subsection{Bemenő adatok és állapotpontok}
+
+A termálvíz kiindulási hőmérséklete $125\,^\circ\mathrm{C}$,
+amelyből az erőműig $10\,\mathrm{K}$ hőmérséklet-csökkenést
+feltételeztünk. A modell fő paramétereit a
+\ref{tab:orc_adatok}. táblázat tartalmazza.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Az egy termelő kútra vonatkozó ORC-modell alapadatai.}
+    \label{tab:orc_adatok}
+    \begin{tabular}{lc}
+        \toprule
+        \textbf{Paraméter} & \textbf{Érték} \\
+        \midrule
+        Termálvíz belépő hőmérséklete & $115\,^\circ\mathrm{C}$ \\
+        Termálvíz tömegárama & $40\,\mathrm{kg/s}$ \\
+        Termálvíz fajhője & $4180\,\mathrm{J/(kg\,K)}$ \\
+        Minimális termálvíz-hőmérséklet az ORC után
+            & $65\,^\circ\mathrm{C}$ \\
+        Minimális hőcserélő-hőmérsékletkülönbség
+            & $8\,\mathrm{K}$ \\
+        Turbinába lépő gőz túlhevítése & $3\,\mathrm{K}$ \\
+        Turbina és szivattyú izentrópikus hatásfoka
+            & $0{,}80;\quad 0{,}70$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+A körfolyamat négy állapotpontja: \textbf{1.} a kondenzátor kilépése,
+telített folyadék; \textbf{2.} a szivattyú kilépése, sűrített folyadék;
+\textbf{3.} az elpárologtató kilépése, túlhevített gőz;
+\textbf{4.} a turbina kilépése. Az alsó nyomásszint
+$p_{\text{kond}}$, a felső $p_{\text{párolgás}}$.
+
+\subsection{Az állapotváltozások számítása}
+
+A kondenzációs hőmérséklet meghatározza az alsó nyomásszintet:
+$p_{\text{kond}}=p_{\text{tel}}(T_{\text{kond}})$
+Az első állapotpont fajlagos entalpiáját és entrópiáját telített
+folyadékra számítjuk. Az energiamérlegekben a $h=u+pv$ fajlagos
+entalpiát használjuk, amely a belső energia mellett az áramlási
+munkát is tartalmazza.
+
+A szivattyú ideális kilépő állapotában $s_{2,\text{iz}}=s_1$.
+A tényleges kilépő entalpiát az izentrópikus hatásfok adja:
+\begin{equation}
+    h_{2,\text{iz}}=h(p_{\text{párolgás}},s_1),
+    \qquad
+    h_2=h_1+\frac{h_{2,\text{iz}}-h_1}{\eta_{\text{sziv}}}.
+\end{equation}
+Az elpárologtatóban a munkaközeg állandó nyomáson felmelegszik,
+elpárolog, majd túlhevül. A turbina belépő állapota:
+\begin{equation}
+    T_3=T_{\text{tel}}(p_{\text{párolgás}})
+        +\Delta T_{\text{túlhev}},
+    \qquad
+    h_3=h(p_{\text{párolgás}},T_3),
+    \qquad
+    s_3=s(p_{\text{párolgás}},T_3),
+\end{equation}
+ahol $\Delta T_{\text{túlhev}}$ a túlhevítés mértéke.
+A turbina ideális expanziójára $s_{4,\text{iz}}=s_3$, míg a valós
+kilépő entalpiát a turbina hatásfokával határozzuk meg:
+\begin{equation}
+    h_{4,\text{iz}}=h(p_{\text{kond}},s_3),
+    \qquad
+    h_4=h_3-\eta_{\text{turb}}(h_3-h_{4,\text{iz}}).
+\end{equation}
+Végül a munkaközeg a kondenzátorban hőt ad le, és visszakerül
+az első állapotpontba.
+
+\subsection{Hőforráskorlát és munkaközeg-tömegáram}
+
+A termálvíz lehűtésével átadható hőteljesítményt az ORC utáni
+minimális vízhőmérséklet korlátozza:
+\begin{equation}
+    \dot Q_{\text{víz,felső}}
+    =\dot m_{\text{víz}}c_{p,\text{víz}}
+    (T_{\text{víz,be}}-T_{\text{víz,ki,alsó}})
+    =8{,}36\,\mathrm{MW}.
+\end{equation}
+Ez a kutanként rendelkezésre álló hőteljesítmény felső korlátja,
+amelynek csak egy része alakítható mechanikai munkává.
+Az ebből adódó maximális munkaközeg-tömegáram
+$\dot m_{\text{közeg},T}=\dot Q_{\text{víz,felső}}/(h_3-h_2)$.
+
+További korlát, hogy a hőcserélőben a termálvíz és a munkaközeg
+közötti hőmérsékletkülönbség nem csökkenhet az előírt
+$\Delta T_{\text{min}}$ érték alá. Az e feltétel alapján
+megengedett tömegáramot $\dot m_{\text{közeg},\Delta T}$ jelöli.
+A tényleges tömegáram a két korlát közül a kisebb:
+\begin{align}
+    \dot m_{\text{közeg}}
+    &=\min\left(\dot m_{\text{közeg},T},
+                \dot m_{\text{közeg},\Delta T}\right),\\
+    T_{\text{víz,ki}}
+    &=T_{\text{víz,be}}
+    -\frac{\dot m_{\text{közeg}}(h_3-h_2)}
+    {\dot m_{\text{víz}}c_{p,\text{víz}}}.
+\end{align}
+A $65\,^\circ\mathrm{C}$ tehát alsó korlát, nem minden üzemi pontban
+rögzített kilépő hőmérséklet.
+
+\subsection{Teljesítmény és kapcsolat az éves szimulációval}
+
+A turbina teljesítményét és a szivattyú teljesítményigényét
+a megfelelő entalpiakülönbségek határozzák meg:
+\begin{equation}
+    P_{\text{turb}}=\dot m_{\text{közeg}}(h_3-h_4),
+    \qquad
+    P_{\text{sziv}}=\dot m_{\text{közeg}}(h_2-h_1).
+\end{equation}
+A körfolyamat eredő mechanikai teljesítménye és termikus hatásfoka:
+\begin{equation}
+    P_{\text{kör}}=P_{\text{turb}}-P_{\text{sziv}},
+    \qquad
+    \eta_{\text{termikus}}
+    =\frac{P_{\text{kör}}}
+    {\dot m_{\text{közeg}}(h_3-h_2)}.
+\end{equation}
+A kondenzátorban leadott hőteljesítmény
+$\dot Q_{\text{ki}}=\dot m_{\text{közeg}}(h_4-h_1)$;
+az energiamérleg szerint
+$\dot Q_{\text{be}}-\dot Q_{\text{ki}}=P_{\text{kör}}$.
+
+Az elpárolgási nyomás egyszerre befolyásolja a fajlagosan kinyerhető
+munkát és a hőforráshoz illeszthető tömegáramot, ezért a legnagyobb
+hatásfok nem feltétlenül jelent maximális teljesítményt.
+Az éves szimuláció a modell üzemi pontjaiból, a külső hőmérséklet
+változását figyelembe véve állítja elő az órás termelést.
+A kutankénti eredményeket 14 kútpárra skálázza, majd a
+generátorveszteség és a segédüzemi fogyasztások elszámolásával
+határozza meg a nettó villamos teljesítményt. Az optimalizálás
+munkaközegenként az egész évre rögzített, legnagyobb éves
+villamosenergia-termelést biztosító elpárolgási nyomást keresi.
 \newpage \section{Éves Dinamikus Szimuláció és Optimalizálás}
 Az ORC termodinamikai modellre építve elvégeztük a rendszer 8760 
 órás éves dinamikus szimulációját a három kiválasztott munkaközeg 
